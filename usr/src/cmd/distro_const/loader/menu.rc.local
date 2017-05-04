@@ -206,10 +206,10 @@ also menu-namespace also menu-command-helpers
 
 set menuset_name4="extras"
 
-set mainmenu_caption[7]="Select OI E[x]tras..."
+set mainmenu_caption[7]="Select XS E[x]tras..."
 set mainmenu_command[7]="4 goto_menu"
 set mainmenu_keycode[7]=120
-set mainansi_caption[7]="Select OI E^[1mx^[mtras..."
+set mainansi_caption[7]="Select XS E^[1mx^[mtras..."
 
 set extrasmenu_caption[1]="Back to Main Menu [Backspace]"
 set extrasmenu_command[1]="1 goto_menu"

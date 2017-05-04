@@ -39,6 +39,7 @@ with some tasks taken from the Transfer Module (transfer_mod.py).
 import sys
 import getopt
 import os
+import os.path
 import platform
 
 from osol_install.ict import ICT, \
@@ -74,10 +75,19 @@ def textinstall_exists():
     else:
         return 0
 
+def wants_happy_face_grub():
+
+    if os.path.exists('/.grub-with-graphics'):
+        return 1
+    else:
+        return (not textinstall_exists())
+
 # Test to see if running on a SPARC platform
 IS_SPARC = (platform.platform().find('sparc') >= 0)
 
 info_msg('Starting Python script of Install Completion Tasks')
+
+SONICLE_USER = os.path.isdir("/sonicle")
 
 BASEDIR = ""           # argument B
 USER_SPEC_DBGLVL = ""  # argument d
@@ -255,7 +265,7 @@ else:
         SA.append(ICTO.copy_sparc_bootlst())
     else:
         SA.append(ICTO.explicit_bootfs())
-        if not textinstall_exists():
+        if wants_happy_face_grub():
             SA.append(ICTO.enable_happy_face_boot())
     if not IS_SPARC:
         SA.append(ICTO.copy_splash_xpm())
@@ -276,15 +286,18 @@ else:
     else:
         SA.append(ICTO.enable_nwam())
 
+    SA.append(ICTO.glib_compile_schemas())
+
     SA.append(ICTO.remove_livecd_environment())
     SA.append(ICTO.remove_specific_packages(PKG_REMOVE_LIST))
     SA.append(ICTO.set_flush_content_cache_false())
     # Password is pre-expired in GUI case since user didn't explicitly set it
     SA.append(ICTO.set_root_password(ROOT_PW, not textinstall_exists()))
-    SA.append(ICTO.create_new_user(NU_GOS, NU_LOGIN, NU_PW, NU_GID, NU_UID))
-    SA.append(ICTO.set_homedir_map(NU_LOGIN))
-    SA.append(ICTO.setup_rbac(NU_LOGIN))
-    SA.append(ICTO.setup_sudo(NU_LOGIN))
+    if not SONICLE_USER:
+        SA.append(ICTO.create_new_user(NU_GOS, NU_LOGIN, NU_PW, NU_GID, NU_UID))
+        SA.append(ICTO.set_homedir_map(NU_LOGIN))
+        SA.append(ICTO.setup_rbac(NU_LOGIN))
+        SA.append(ICTO.setup_sudo(NU_LOGIN))
     if not IS_SPARC:
         SA.append(ICTO.copy_capability_file())
     SA.append(ICTO.reset_image_uuid())

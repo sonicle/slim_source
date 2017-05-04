@@ -122,15 +122,25 @@ cc-version:
 	fi
 
 cc64-version:
-	@__VERSION=`$(CC) -m64 -xc -E /dev/null 2>&1 >/dev/null`; \
-	if [ -z "$$__VERSION" ]; then			\
+	@if $(CC) -m64 -v >/dev/null 2>/dev/null; then	\
 		$(ECHO) 64-bit compiler;		\
 		which $(CC);				\
-		$(CC) -v 2>&1 | head -1;		\
+		$(CC) -m64 -v 2>&1 | head -1;		\
 	else						\
 		$(ECHO) No 64-bit compiler found;	\
 		exit 1;					\
 	fi
+
+#cc64-version:
+#	@__VERSION=`$(CC) -m64 -E /dev/null 2>&1 >/dev/null`; \
+#	if [ -z "$$__VERSION" ]; then			\
+#		$(ECHO) 64-bit compiler;		\
+#		which $(CC);				\
+#		$(CC) -v 2>&1 | head -1;		\
+#	else						\
+#		$(ECHO) No 64-bit compiler found;	\
+#		exit 1;					\
+#	fi
 
 java-version:
 	@$(ECHO) Java compiler;				\

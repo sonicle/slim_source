@@ -27,6 +27,8 @@ Display a summary of the user's selections
 
 import curses
 import logging
+import os
+import os.path
 
 from osol_install.profile.disk_info import SliceInfo
 from osol_install.profile.disk_info import PartitionInfo
@@ -46,6 +48,7 @@ class SummaryScreen(BaseScreen):
     
     '''
     
+    SONICLE_USER = os.path.isdir("/sonicle")
     HEADER_TEXT = _("Installation Summary")
     PARAGRAPH = _("Review the settings below before installing."
                                 " Go back (F3) to make changes.")
@@ -100,7 +103,10 @@ class SummaryScreen(BaseScreen):
                      self.install_profile.system.actual_lang)
         lines.append("")
         lines.append(_("Users:"))
-        lines.extend(self.get_users())
+	if SummaryScreen.SONICLE_USER:
+	    lines.append(" privileged user sonicle created automatically (password sonicle)")
+	else:
+            lines.extend(self.get_users())
         lines.append("")
         lines.append(_("Network:"))
         lines.extend(self.get_networks())

@@ -247,12 +247,12 @@ POUND_SIGN:sh=	/usr/bin/echo \\043
 RELEASE_MAJOR=  5
 RELEASE_MINOR=  11
 RELEASE=        $(RELEASE_MAJOR).$(RELEASE_MINOR)
-VERSION=        SunOS Installation Development
+VERSION=        XStreamOS Installation Development
 PATCHID=        $(VERSION)
 RELEASE_DATE=   release date not set
 PATCH_DATE=     $(RELEASE_DATE)
-RELEASE_CM=     "@($(POUND_SIGN))SunOS $(RELEASE) $(PATCHID) $(PATCH_DATE)"
-DEV_CM=         "@($(POUND_SIGN))SunOS Internal Development: non-nightly build"
+RELEASE_CM=     "@($(POUND_SIGN))XStreamOS $(RELEASE) $(PATCHID) $(PATCH_DATE)"
+DEV_CM=         "@($(POUND_SIGN))XStreamOS Internal Development: non-nightly build"
 
 PROCESS_COMMENT=	@?mcs -d -a $(RELEASE_CM) -a $(DEV_CM)
 $(RELEASE_BUILD)PROCESS_COMMENT=	@?mcs -d -a $(RELEASE_CM)
@@ -270,8 +270,8 @@ $(RELEASE_BUILD)POST_PROCESS= $(PROCESS_COMMENT) $@ ;\
 # update an image to the resulting repositories, this must match the
 # publisher name provided to "pkg set-publisher."
 #
-PKGPUBLISHER_REDIST=    install-nightly
-PKGPUBLISHER_NONREDIST= install-extra
+PKGPUBLISHER_REDIST=    sonicle.com
+PKGPUBLISHER_NONREDIST= sonicle.com-extra
 
 
 #	Default build rules which perform comment section post-processing.

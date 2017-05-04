@@ -68,10 +68,13 @@ CPIO_TRANSFER = "0"
 ICT_USER_UID = "101"
 ICT_USER_GID = "10"
 
+ICT_SONICLE_UID = "501"
+ICT_SONICLE_GID = "501"
+
 INSTALL_FINISH_PROG = "/sbin/install-finish"
 
 # Initial BE name
-INIT_BE_NAME = "openindiana"
+INIT_BE_NAME = "xstreamos"
 
 # definitions for ZFS pool
 INSTALL_SNAPSHOT = "install"
@@ -88,7 +91,9 @@ ZFS_SHARED_FS = ["/export/home", "/export"]
 #
 INSTALL_STATUS = None
 
-TI_RPOOL_PROPERTY_STATE = "org.openindiana.caiman:install"
+SONICLE_USER = os.path.isdir("/sonicle")
+
+TI_RPOOL_PROPERTY_STATE = "com.sonicle.caiman:install"
 TI_RPOOL_BUSY = "busy"
 
 
@@ -196,11 +201,11 @@ def cleanup_existing_install_target(install_profile):
         logging.debug("Root pool %s does not exist", rootpool_name)
         return   # rpool doesn't exist, no need to clean up
 
-    # Check value of rpool's org.openindiana.caiman:install property
+    # Check value of rpool's com.sonicle.caiman:install property
     # If it is busy, that means the pool is left over from an aborted install.
     # If the property doesn't exist or has another value, we assume
     # that the root pool contains valid Solaris instance.
-    cmd = "/usr/sbin/zfs get -H -o value org.openindiana.caiman:install " + \
+    cmd = "/usr/sbin/zfs get -H -o value com.sonicle.caiman:install " + \
           rootpool_name
     logging.debug("Executing: %s", cmd)
     (status, pool_status) = commands.getstatusoutput(cmd)
@@ -253,7 +258,7 @@ def create_root_pool(install_profile):
     # Create boot/grub directory for holding menu.lst file
     exec_cmd(["/usr/bin/mkdir", "-p", "/%s/boot/grub" % (rootpool_name) ],
              "creating grub menu directory")
-    # Mark created pool as 'busy' (org.openindiana.caiman:install=busy)
+    # Mark created pool as 'busy' (com.sonicle.caiman:install=busy)
     exec_cmd(["/usr/sbin/zfs", "set", "%s=%s" % (TI_RPOOL_PROPERTY_STATE,
              TI_RPOOL_BUSY), rootpool_name ], "marking pool as busy")
 
@@ -561,11 +566,12 @@ def run_ICTs(install_profile, hostname, ict_mesg, locale,
     #
     # create user directory if needed
     #
-    try:
-        exec_cmd([ICT_PROG, "ict_configure_user_directory", INSTALLED_ROOT_DIR,
-                  ulogin], "execute ict_configure_user_directory() ICT")
-    except ti_utils.InstallationError:
-        failed_icts += 1
+    if ulogin:
+        try:
+            exec_cmd([ICT_PROG, "ict_configure_user_directory", INSTALLED_ROOT_DIR,
+                      ulogin], "execute ict_configure_user_directory() ICT")
+        except ti_utils.InstallationError:
+            failed_icts += 1
 
     #
     # set host name
@@ -577,11 +583,12 @@ def run_ICTs(install_profile, hostname, ict_mesg, locale,
     except ti_utils.InstallationError:
         failed_icts += 1
     
-    try:
-        exec_cmd([ICT_PROG, "ict_set_user_profile", INSTALLED_ROOT_DIR,
-                  ulogin], "execute ict_set_user_profile() ICT")
-    except ti_utils.InstallationError:
-        failed_icts += 1
+    if ulogin:
+        try:
+            exec_cmd([ICT_PROG, "ict_set_user_profile", INSTALLED_ROOT_DIR,
+                      ulogin], "execute ict_set_user_profile() ICT")
+        except ti_utils.InstallationError:
+            failed_icts += 1
 
     # Setup bootfs property so that newly created Solaris instance is booted
     # appropriately
@@ -601,9 +608,31 @@ def run_ICTs(install_profile, hostname, ict_mesg, locale,
     INSTALL_STATUS.update(InstallStatus.ICT, 50, ict_mesg)
 
     # Run the install-finish script
-    cmd = [INSTALL_FINISH_PROG, "-B", INSTALLED_ROOT_DIR, "-R", root_pass,
-           "-n", ureal_name, "-l", ulogin, "-p", upass, "-G", ICT_USER_GID,
-           "-U", ICT_USER_UID]
+    cmd = [INSTALL_FINISH_PROG, "-B", INSTALLED_ROOT_DIR, "-R", root_pass]
+
+    if SONICLE_USER:
+        cmd.append("-n")
+        cmd.append("Sonicle")
+        cmd.append("-l")
+        cmd.append("sonicle")
+        cmd.append("-p")
+        cmd.append(root_pass)
+        cmd.append("-G")
+        cmd.append(ICT_SONICLE_GID)
+        cmd.append("-U")
+        cmd.append(ICT_SONICLE_UID)
+    else:
+        cmd.append("-n")
+        cmd.append(ureal_name)
+        cmd.append("-l")
+        cmd.append(ulogin)
+        cmd.append("-p")
+        cmd.append(upass)
+        cmd.append("-G")
+        cmd.append(ICT_USER_GID)
+        cmd.append("-U")
+        cmd.append(ICT_USER_UID)
+
     if (install_profile.nic.type == NetworkInfo.NONE):
         cmd.append("-N")
     elif(install_profile.nic.type == NetworkInfo.MANUAL and install_profile.nic != ""):

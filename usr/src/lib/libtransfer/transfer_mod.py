@@ -1095,7 +1095,7 @@ class TransferIps(object):
                  self._refresh_flag, self._alt_auth)
         else:
             cmd = TMDefs.PKG + \
-                " -R %s set-publisher %s -O %s %s %s" % \
+                " -R %s set-publisher %s -g %s %s %s" % \
                 (self._init_mntpt, self._pref_flag, self._alt_url,
                  self._refresh_flag, self._alt_auth)
         try:

@@ -42,9 +42,18 @@ if [[ -z "$ROOT_SHELL" ]]; then
 	ROOT_SHELL="/usr/bin/sh"
 fi
 
+RELEASE="Sonicle XStreamOS"
+if [ -f /etc/xstream-install-version ]; then
+	RELEASE=`cat /etc/xstream-install-version`
+fi
+
+if [[ "$RELEASE" == *Desktop* ]]; then
+	>/.grub-with-graphics
+fi
+
 # Define the menu of commands and prompts
 menu_items=( \
-    (menu_str=`gettext "Install OpenIndiana"`			 \
+    (menu_str=`gettext "Install"`" $RELEASE"			 \
 	cmds=("/usr/bin/text-install")					 \
 	do_subprocess="true"						 \
 	msg_str="")							 \
@@ -172,8 +181,8 @@ for ((;;)) ; do
 	# Display the menu.
 	clear
 	printf \
-	    "`gettext 'Welcome to the OpenIndiana %s installation menu'`" \
-	    "`uname -v`"
+	    "`gettext 'Welcome to the %s installation menu'`" \
+	    "$RELEASE"
 	printf " \n\n"
 	for i in "${!menu_items[@]}"; do
 		print "\t$((${i} + 1))  ${menu_items[$i].menu_str}"

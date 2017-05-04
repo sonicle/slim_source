@@ -48,6 +48,23 @@ LOG_FORMAT = ("%(asctime)s - %(levelname)-8s: "
               "%(filename)s:%(lineno)d %(message)s")
 LOG_LEVEL_INPUT = 5
 LOG_NAME_INPUT = "INPUT"
-RELEASE = {"release" : _("OpenIndiana")}
+
+DRELEASE = "Sonicle XStreamOS"
+ivname = '/etc/xstream-install-version'
+try:
+        fp = open(ivname)
+        line = fp.readline();
+        if line != None:
+                DRELEASE=line.rstrip('\r\n')
+
+except OSError, (errno, strerror):
+        prerror('No ' + ivname + ' found, using default: ' + DRELEASE)
+except StandardError:
+        prerror('No ' + ivname + ' found, using default: ' + DRELEASE)
+
+if fp != None:
+        fp.close()
+
+RELEASE = {"release" : _(DRELEASE)}
 
 environ.setdefault("ESCDELAY", "200")
